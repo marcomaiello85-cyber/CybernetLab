@@ -18,22 +18,89 @@ const steps = [['bulb','Idea','Ascoltiamo, analizziamo e definiamo il potenziale
 document.querySelector('.steps').innerHTML = steps.map(([i,t,d],n)=>`<article class="step"><div class="step-icon">${icon(i)}</div><div><span class="step-number">0${n+1}</span><h3>${t}</h3><p>${d}</p></div></article>`).join('');
 document.querySelector('.technologies').innerHTML = [['brain','Intelligenza Artificiale'],['gear','Automazione'],['cloud','Cloud Software'],['chart','Data Analysis'],['layers','Piattaforme Digitali']].map(([i,t])=>`<div class="technology">${icon(i)}${t}</div>`).join('');
 document.querySelector('#year').textContent = new Date().getFullYear();
+
 const menuButton = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('#navigation');
 menuButton.addEventListener('click',()=>{const open=menuButton.getAttribute('aria-expanded')!=='true';menuButton.setAttribute('aria-expanded',open);menuButton.setAttribute('aria-label',open?'Chiudi menu':'Apri menu');navigation.classList.toggle('open',open);});
 navigation.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{navigation.classList.remove('open');menuButton.setAttribute('aria-expanded','false');menuButton.setAttribute('aria-label','Apri menu');}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){navigation.classList.remove('open');menuButton.setAttribute('aria-expanded','false');}});
+
 const projectData = {
- vault:{title:'Vault TCG',description:'Uno spazio dedicato ai collezionisti: gestione della collezione, valutazione delle carte con intelligenza artificiale, trading e dati di mercato.',tags:['Collection Management','AI Grading','Trading','Market Data']},
- scan:{title:'Vault Scan',description:'Dal mondo fisico al digitale: scansione e computer vision per analizzare le carte da collezione e trasformarle in informazioni digitali.',tags:['Scanning','Computer Vision','AI Analysis']},
- desk:{title:'WholeDesk',description:'Il tuo business in un solo spazio. CRM, progetti e attività si incontrano in una piattaforma con funzionalità di intelligenza artificiale.',tags:['CRM','Projects','Tasks','AI']}
+ scan:{title:'Vault Scan',description:'Dal mondo fisico al digitale: scansione e computer vision per analizzare le carte da collezione e trasformarle in informazioni digitali.',tags:['Scanning','Computer Vision','AI Analysis']}
 };
 const dialog=document.querySelector('#project-dialog');
-document.querySelectorAll('[data-project]').forEach(button=>button.addEventListener('click',()=>{const p=projectData[button.dataset.project];document.querySelector('#dialog-title').textContent=p.title;document.querySelector('#dialog-description').textContent=p.description;document.querySelector('#dialog-tags').innerHTML=p.tags.map(t=>`<span>${t}</span>`).join('');dialog.setAttribute('aria-labelledby','dialog-title');dialog.showModal();document.body.classList.add('modal-open');}));
-document.querySelectorAll('dialog').forEach(d=>{d.querySelector('.close').addEventListener('click',()=>d.close());d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}});d.addEventListener('close',()=>document.body.classList.remove('modal-open'));});
+document.querySelectorAll('[data-project]').forEach(button=>button.addEventListener('click',()=>{
+ const p=projectData[button.dataset.project];
+ document.querySelector('#dialog-title').textContent=p.title;
+ document.querySelector('#dialog-description').textContent=p.description;
+ document.querySelector('#dialog-tags').innerHTML=p.tags.map(t=>`<span>${t}</span>`).join('');
+ dialog.setAttribute('aria-labelledby','dialog-title');
+ dialog.showModal();
+ document.body.classList.add('modal-open');
+}));
+document.querySelectorAll('dialog').forEach(d=>{
+ d.querySelector('.close').addEventListener('click',()=>d.close());
+ d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}});
+ d.addEventListener('close',()=>document.body.classList.remove('modal-open'));
+});
 document.querySelector('#dialog-contact').addEventListener('click',()=>dialog.close());
+
 const grid=document.querySelector('#project-grid');
-function moveProjects(direction){if(grid.scrollWidth>grid.clientWidth+1){const amount=grid.querySelector('.project-card').getBoundingClientRect().width+22;const end=grid.scrollWidth-grid.clientWidth;let target=grid.scrollLeft+amount*direction;if(target>end+10)target=0;if(target<-10)target=end;grid.scrollTo({left:target,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}else{if(direction>0)grid.append(grid.firstElementChild);else grid.prepend(grid.lastElementChild);}}
-document.querySelector('#prev').addEventListener('click',()=>moveProjects(-1));document.querySelector('#next').addEventListener('click',()=>moveProjects(1));
-const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){navigation.querySelectorAll('a').forEach(a=>{const active=a.hash===`#${entry.target.id}`;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});}}),{rootMargin:'-10% 0px -55% 0px',threshold:0});
+function moveProjects(direction){
+ if(grid.scrollWidth>grid.clientWidth+1){
+  const amount=grid.querySelector('.project-card').getBoundingClientRect().width+22;
+  const end=grid.scrollWidth-grid.clientWidth;
+  let target=grid.scrollLeft+amount*direction;
+  if(target>end+10)target=0;
+  if(target<-10)target=end;
+  grid.scrollTo({left:target,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+ }else{
+  if(direction>0)grid.append(grid.firstElementChild);
+  else grid.prepend(grid.lastElementChild);
+ }
+}
+document.querySelector('#prev').addEventListener('click',()=>moveProjects(-1));
+document.querySelector('#next').addEventListener('click',()=>moveProjects(1));
+
+const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
+ if(entry.isIntersecting){
+  navigation.querySelectorAll('a').forEach(a=>{
+   const active=a.hash===`#${entry.target.id}`;
+   a.classList.toggle('active',active);
+   if(active)a.setAttribute('aria-current','location');
+   else a.removeAttribute('aria-current');
+  });
+ }
+}),{rootMargin:'-10% 0px -55% 0px',threshold:0});
 document.querySelectorAll('main section[id]').forEach(section=>observer.observe(section));
+
+const contactForm=document.querySelector('#contact-form-element');
+const formStatus=document.querySelector('#form-status');
+if(contactForm){
+ contactForm.addEventListener('submit',event=>{
+  event.preventDefault();
+  if(!contactForm.reportValidity()) return;
+
+  const data=new FormData(contactForm);
+  const nome=String(data.get('nome')||'').trim();
+  const cognome=String(data.get('cognome')||'').trim();
+  const email=String(data.get('email')||'').trim();
+  const oggetto=String(data.get('oggetto')||'').trim();
+  const idea=String(data.get('idea')||'').trim();
+
+  const subject=encodeURIComponent(`CybernetLab — ${oggetto}`);
+  const body=encodeURIComponent(
+`Nome: ${nome}
+Cognome: ${cognome}
+Email: ${email}
+
+Oggetto: ${oggetto}
+
+Descrivimi la tua idea:
+${idea}`
+  );
+
+  formStatus.textContent='Apro il tuo programma email per completare l’invio.';
+  window.location.href=`mailto:infocybernet24@gmail.com?subject=${subject}&body=${body}`;
+ });
+}
