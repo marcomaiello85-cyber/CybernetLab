@@ -77,30 +77,40 @@ document.querySelectorAll('main section[id]').forEach(section=>observer.observe(
 const contactForm=document.querySelector('#contact-form-element');
 const formStatus=document.querySelector('#form-status');
 if(contactForm){
- contactForm.addEventListener('submit',event=>{
+ const submitButton=contactForm.querySelector('button[type="submit"]');
+ const originalButtonContent=submitButton.innerHTML;
+
+ contactForm.addEventListener('submit',async event=>{
   event.preventDefault();
   if(!contactForm.reportValidity()) return;
 
-  const data=new FormData(contactForm);
-  const nome=String(data.get('nome')||'').trim();
-  const cognome=String(data.get('cognome')||'').trim();
-  const email=String(data.get('email')||'').trim();
-  const oggetto=String(data.get('oggetto')||'').trim();
-  const idea=String(data.get('idea')||'').trim();
+  formStatus.textContent='Invio in corso...';
+  submitButton.disabled=true;
+  submitButton.innerHTML='<span aria-hidden="true">➤</span> Invio...';
 
-  const subject=encodeURIComponent(`CybernetLab — ${oggetto}`);
-  const body=encodeURIComponent(
-`Nome: ${nome}
-Cognome: ${cognome}
-Email: ${email}
+  try{
+   const response=await fetch(contactForm.action,{
+    method:'POST',
+    body:new FormData(contactForm),
+    headers:{'Accept':'application/json'}
+   });
 
-Oggetto: ${oggetto}
-
-Descrivimi la tua idea:
-${idea}`
-  );
-
-  formStatus.textContent='Apro il tuo programma email per completare l’invio.';
-  window.location.href=`mailto:infocybernet24@gmail.com?subject=${subject}&body=${body}`;
+   if(response.ok){
+    contactForm.reset();
+    formStatus.textContent='Grazie! La tua richiesta è stata inviata correttamente.';
+   }else{
+    const data=await response.json().catch(()=>({}));
+    if(data.errors && data.errors.length){
+     formStatus.textContent=data.errors.map(error=>error.message).join(' ');
+    }else{
+     formStatus.textContent='Non è stato possibile inviare la richiesta. Riprova tra poco.';
+    }
+   }
+  }catch(error){
+   formStatus.textContent='Errore di connessione. Controlla la rete e riprova.';
+  }finally{
+   submitButton.disabled=false;
+   submitButton.innerHTML=originalButtonContent;
+  }
  });
 }
