@@ -14,3 +14,13 @@
 @media(max-width:1150px){.site-logo img{width:220px}}
 @media(max-width:850px){.site-logo img{width:200px}}
 @media(max-width:520px){.site-logo img{width:180px}}
+/* Portfolio: three projects per view on desktop, swipe on smaller screens. */
+@media(min-width:851px){
+ .project-grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc((100% - 44px)/3);overflow-x:auto;scroll-snap-type:x mandatory;padding:5px 0 17px;scrollbar-color:#274777 transparent}
+ .project-card{scroll-snap-align:start}
+}
+.website-preview{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;object-position:top;border-bottom:1px solid var(--line)}
+.website-project .project-content{margin-top:0;padding-top:22px}
+.website-project .project-content>p{line-height:1.5}
+.project-card.giusvalla{border-color:#3185b4}
+.project-card.teresa{border-color:#8a7550}

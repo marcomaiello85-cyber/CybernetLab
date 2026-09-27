@@ -48,11 +48,11 @@ document.querySelector('#dialog-contact').addEventListener('click',()=>dialog.cl
 const grid=document.querySelector('#project-grid');
 function moveProjects(direction){
  if(grid.scrollWidth>grid.clientWidth+1){
-  const amount=grid.querySelector('.project-card').getBoundingClientRect().width+22;
+  const amount=grid.querySelector('.project-card').getBoundingClientRect().width+parseFloat(getComputedStyle(grid).columnGap);
   const end=grid.scrollWidth-grid.clientWidth;
-  let target=grid.scrollLeft+amount*direction;
-  if(target>end+10)target=0;
-  if(target<-10)target=end;
+  let target=Math.max(0,Math.min(end,grid.scrollLeft+amount*direction));
+  if(direction>0 && grid.scrollLeft>=end-2)target=0;
+  if(direction<0 && grid.scrollLeft<=2)target=end;
   grid.scrollTo({left:target,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
  }else{
   if(direction>0)grid.append(grid.firstElementChild);
