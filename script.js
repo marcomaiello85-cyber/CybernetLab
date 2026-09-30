@@ -26,6 +26,7 @@ navigation.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){navigation.classList.remove('open');menuButton.setAttribute('aria-expanded','false');}});
 
 const projectData = {
+ fielddesk:{title:'FieldDesk AI',description:'Web app in sviluppo per imprese tecniche, di installazione e manutenzione. Riunisce la pianificazione degli interventi, la gestione di tecnici e squadre, clienti, materiali e magazzino, preventivi, fatture amministrative e rapportini. Include accessi per ruolo e ambienti separati per azienda. L’immagine mostra il concept del progetto; la distribuzione attuale è locale e le app native Android e iOS non sono ancora pubblicate.',tags:['Web app','Pianificazione','Squadre','Magazzino','Documenti','In sviluppo']},
  scan:{title:'Vault Scan',description:'Dal mondo fisico al digitale: scansione e computer vision per analizzare le carte da collezione e trasformarle in informazioni digitali.',tags:['Scanning','Computer Vision','AI Analysis']}
 };
 const dialog=document.querySelector('#project-dialog');
