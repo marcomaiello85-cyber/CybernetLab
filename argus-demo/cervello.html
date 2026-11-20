@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<script src="demo.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#030711">
+<title>A.R.G.U.S. · Secondo cervello</title>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}</script>
+<style>
+:root{--bg:#030711;--cy:#20d9ff;--cy2:#b5f4ff;--vi:#a16cff;--tx:#e8f7ff;--mu:#8da9c1;--line:rgba(32,217,255,.3);--panel:linear-gradient(135deg,rgba(5,19,37,.92),rgba(11,15,36,.86))}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:14px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;overflow:hidden}
+#scena{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.top{position:fixed;left:0;right:0;top:0;z-index:3;display:flex;gap:10px;align-items:center;padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top));background:linear-gradient(180deg,rgba(3,7,17,.95),rgba(3,7,17,.6) 70%,transparent)}
+.tit{flex:none}.tit small{display:block;font-size:10.5px;letter-spacing:.32em;color:var(--cy)}.tit b{font-size:clamp(15px,2.2vw,21px);letter-spacing:.2em}
+.cerca{flex:1;min-width:0;max-width:420px;margin-left:auto;display:flex;gap:6px}
+.cerca input{flex:1;min-width:0;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(8,20,39,.85);color:var(--tx);font:inherit}
+.cerca input:focus{outline:none;border-color:var(--cy);box-shadow:0 0 16px rgba(32,217,255,.25)}
+button{font:inherit;cursor:pointer;color:var(--cy2);background:rgba(32,217,255,.08);border:1px solid rgba(32,217,255,.42);border-radius:999px;padding:9px 13px;white-space:nowrap}
+button:hover{background:rgba(32,217,255,.18)}
+.x{width:40px;height:40px;padding:0;font-size:18px;flex:none}
+@media(max-width:700px){.top{flex-wrap:wrap}.tit{flex:1}.cerca{order:5;flex-basis:100%;max-width:none;margin:0}.info{display:none}.leg span{font-size:11px;padding:4px 8px}}
+.leg{position:fixed;left:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:3;display:flex;flex-wrap:wrap;gap:6px;max-width:min(560px,calc(100vw - 24px))}
+.leg span{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(8,20,39,.8);cursor:pointer;user-select:none}
+.leg span i{width:9px;height:9px;border-radius:50%;box-shadow:0 0 8px currentColor;background:currentColor}
+.leg span.off{opacity:.35}
+.info{position:fixed;right:14px;bottom:max(12px,env(safe-area-inset-bottom));z-index:3;font-size:11px;color:var(--mu);letter-spacing:.08em;text-align:right;pointer-events:none}
+.etichetta{position:fixed;z-index:2;pointer-events:none;transform:translate(-50%,-140%);padding:4px 9px;border-radius:8px;background:rgba(3,7,17,.85);border:1px solid var(--line);font-size:12.5px;white-space:nowrap;max-width:60vw;overflow:hidden;text-overflow:ellipsis}
+.etichetta[hidden]{display:none}
+.scheda{position:fixed;z-index:4;right:14px;top:74px;bottom:62px;width:min(380px,calc(100vw - 28px));background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--cy);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;transform:translateX(120%);transition:transform .28s ease}
+.scheda.su{transform:none}
+@media(max-width:700px){.scheda{left:8px;right:8px;width:auto;top:auto;bottom:8px;height:62vh;transform:translateY(110%)}.scheda.su{transform:none}}
+.scheda .th{display:flex;align-items:flex-start;gap:10px;padding:14px 14px 8px}
+.scheda .th div{flex:1;min-width:0}.scheda .tipo{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase}
+.scheda h2{margin:3px 0 0;font-size:18px;line-height:1.3;overflow-wrap:anywhere}
+.scheda .bd{padding:0 14px 14px;overflow-y:auto;flex:1}
+.campo{margin:10px 0}.campo small{display:block;font-size:10.5px;letter-spacing:.2em;color:var(--cy);text-transform:uppercase}.campo div{white-space:pre-wrap;overflow-wrap:anywhere;color:#d6e9f7}
+.campo a{color:var(--cy2)}
+.vicini{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}.vicini small{font-size:10.5px;letter-spacing:.2em;color:var(--cy)}
+.vicini a{display:flex;gap:8px;align-items:center;padding:7px 0;color:var(--tx);text-decoration:none;border-bottom:1px solid rgba(32,217,255,.08);cursor:pointer}
+.vicini a i{width:8px;height:8px;border-radius:50%;flex:none;background:currentColor;box-shadow:0 0 6px currentColor}
+.vicini a span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.intu{position:fixed;z-index:4;left:14px;top:74px;width:min(380px,calc(100vw - 28px));max-height:calc(100vh - 150px);overflow-y:auto;background:var(--panel);border:1px solid rgba(255,159,67,.5);border-top:2px solid #ff9f43;border-radius:16px;padding:12px 14px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.intu[hidden]{display:none}.intu h3{margin:0 0 6px;font-size:12px;letter-spacing:.24em;color:#ffc58a}
+.intu .it{padding:9px 10px;margin:8px 0;border:1px solid rgba(255,159,67,.25);border-radius:12px;cursor:pointer;background:rgba(255,159,67,.05)}.intu .it:hover,.intu .it.on{background:rgba(255,159,67,.14);border-color:#ff9f43}
+.intu .it b{display:block}.intu .it p{margin:4px 0 0;color:#c4dcee;font-size:13px}.intu .it i{display:block;margin-top:4px;color:#ffd8a8;font-size:13px;font-style:normal}
+@media(max-width:700px){.intu{top:112px}}
+#intBtn{position:relative}#intBtn.nuovo::after{content:"";position:absolute;right:2px;top:2px;width:9px;height:9px;border-radius:50%;background:#ff9f43;box-shadow:0 0 8px #ff9f43}
+.stato{position:fixed;inset:0;z-index:1;display:grid;place-items:center;pointer-events:none;color:var(--mu);text-align:center;padding:20px}
+.stato.err{color:#ffb4a8;pointer-events:auto}
+</style>
+</head>
+<body>
+<canvas id="scena" aria-label="Rete neurale del secondo cervello"></canvas>
+<div class="top">
+  <button class="x" id="chiudi" aria-label="Chiudi il cervello">✕</button>
+  <div class="tit"><small>A.R.G.U.S.</small><b>SECONDO CERVELLO</b></div>
+  <form class="cerca" id="cerca"><input id="q" placeholder="Cerca un ricordo…" autocomplete="off" aria-label="Cerca nel secondo cervello"><button type="submit">Cerca</button></form>
+  <button class="x" id="intBtn" aria-label="Intuizioni del cervello" title="Cosa nota il cervello" hidden>💡</button><button class="x" id="agg" aria-label="Aggiorna la mappa" title="Aggiorna">↻</button>
+</div>
+<div class="intu" id="intu" hidden></div>
+<div class="leg" id="leg"></div>
+<div class="info" id="info"></div>
+<div class="etichetta" id="eti" hidden></div>
+<div class="stato" id="stato">Accendo i neuroni…</div>
+<aside class="scheda" id="scheda" aria-live="polite">
+  <div class="th"><div><div class="tipo" id="sTipo"></div><h2 id="sTit"></h2></div><button class="x" id="sChiudi" aria-label="Chiudi la scheda">✕</button></div>
+  <div class="bd" id="sBd"></div>
+</aside>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const $ = id => document.getElementById(id);
+let CFG = {}; try { CFG = JSON.parse(localStorage.getItem('jarvis_cfg')) || {}; } catch (e) {}
+const TIPI = {
+  'cliente':  { col: '#20d9ff', nome: 'Clienti',      r: 2.2 },
+  'idea':     { col: '#a16cff', nome: 'Idee',         r: 1.25 },
+  'nota':     { col: '#7fe3ff', nome: 'Note',         r: 1.05 },
+  'documento':{ col: '#ffc94d', nome: 'Documenti',    r: 1.2 },
+  'da fare':  { col: '#ff7ba6', nome: 'Da fare',      r: 1.05 },
+  'lavoro':   { col: '#55e8b2', nome: 'Lavori',       r: 1.0 },
+  'prodotto': { col: '#ffffff', nome: 'Prodotti',     r: 1.9 },
+  'garage':   { col: '#ff9f43', nome: 'Garage',       r: 1.5 }
+};
+const nascosti = new Set();
+function stato(t, err) { $('stato').textContent = t || ''; $('stato').className = 'stato' + (err ? ' err' : ''); $('stato').hidden = !t; }
+function api(d) {
+  if (!CFG.url) return Promise.reject(new Error('Apri ARGUS su questo dispositivo e collegalo (⚙), poi torna qui.'));
+  d.codice = CFG.codice;
+  return fetch(CFG.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow', body: JSON.stringify(d) })
+    .then(r => r.json()).then(j => { if (!j.ok) throw new Error(j.errore || 'richiesta non riuscita'); return j; });
+}
+const dentro = window.parent !== window;
+$('chiudi').onclick = () => { if (dentro) parent.postMessage({ argus: 'chiudiCervello' }, '*'); else location.href = './'; };
+
+/* ---------------- scena ---------------- */
+const mobile = matchMedia('(max-width: 700px)').matches, ridotto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const renderer = new THREE.WebGLRenderer({ canvas: $('scena'), antialias: true, alpha: false, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, mobile ? 1.5 : 2));
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x030711); scene.fog = new THREE.FogExp2(0x030711, .0065);
+const camera = new THREE.PerspectiveCamera(60, 1, .1, 2000); camera.position.set(0, 18, mobile ? 170 : 135);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = .07; controls.autoRotate = !ridotto; controls.autoRotateSpeed = .45; controls.minDistance = 12; controls.maxDistance = 420;
+function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+
+// polvere di fondo
+let POLVERE = null;
+(function () { const n = mobile ? 500 : 1100, p = new Float32Array(n * 3); for (let i = 0; i < n * 3; i++) p[i] = (Math.random() - .5) * 700;
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+  POLVERE = g; })();
+
+// sprite luminoso per i neuroni
+function sprite() { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'), r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(.16, 'rgba(255,255,255,.95)'); r.addColorStop(.32, 'rgba(255,255,255,.35)'); r.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = r; g.fillRect(0, 0, 128, 128); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; }
+const TEX = sprite();
+scene.add(new THREE.Points(POLVERE, new THREE.PointsMaterial({ color: 0x2a86b8, size: 2.2, map: TEX, transparent: true, opacity: .45, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true })));
+const matNeuroni = new THREE.ShaderMaterial({
+  uniforms: { map: { value: TEX }, scala: { value: innerHeight * .9 } },
+  vertexShader: 'attribute float size; attribute vec3 colore; attribute float luce; varying vec3 vC; varying float vL; uniform float scala;' +
+    'void main(){ vC=colore; vL=luce; vec4 mv=modelViewMatrix*vec4(position,1.0); gl_PointSize=size*(scala/ -mv.z); gl_Position=projectionMatrix*mv; }',
+  fragmentShader: 'uniform sampler2D map; varying vec3 vC; varying float vL; void main(){ vec4 t=texture2D(map,gl_PointCoord); gl_FragColor=vec4(vC*(0.65+vL),t.a*min(1.0,0.35+vL)); if(gl_FragColor.a<0.02) discard; }',
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+});
+addEventListener('resize', () => { matNeuroni.uniforms.scala.value = innerHeight * .9; });
+
+let N = [], E = [], idx = {}, vicini = {}, punti = null, linee = null, sel = null, evidenziati = new Set(), impulsi = [], impulsiObj = null;
+const tmpC = new THREE.Color();
+
+function costruisci(m) {
+  [punti, linee, impulsiObj].forEach(o => { if (o) { scene.remove(o); o.geometry.dispose(); } });
+  N = m.neuroni.map((x, i) => ({ ...x, i, p: new THREE.Vector3(), v: new THREE.Vector3(), grado: 0 }));
+  idx = {}; N.forEach(n => idx[n.id] = n);
+  E = m.sinapsi.filter(s => idx[s[0]] && idx[s[1]]).map(s => ({ a: idx[s[0]], b: idx[s[1]], w: s[2], t: s[3] }));
+  vicini = {}; N.forEach(n => vicini[n.id] = []);
+  E.forEach(e => { e.a.grado++; e.b.grado++; vicini[e.a.id].push(e); vicini[e.b.id].push(e); });
+  // posizioni iniziali: clienti e prodotti sul guscio, il resto vicino al proprio cliente o a caso
+  const gold = Math.PI * (3 - Math.sqrt(5)); let k = 0;
+  const hub = N.filter(n => n.t === 'cliente' || n.t === 'prodotto');
+  hub.forEach((n, i) => { const y = 1 - (i / Math.max(1, hub.length - 1)) * 2, r = Math.sqrt(1 - y * y), th = gold * i; n.p.set(Math.cos(th) * r * 55, y * 55, Math.sin(th) * r * 55); });
+  N.forEach(n => { if (n.t === 'cliente' || n.t === 'prodotto') return; const h = vicini[n.id].map(e => e.a === n ? e.b : e.a).find(x => x.t === 'cliente' || x.t === 'prodotto');
+    if (h) n.p.copy(h.p).add(new THREE.Vector3((Math.random() - .5) * 16, (Math.random() - .5) * 16, (Math.random() - .5) * 16));
+    else n.p.set((Math.random() - .5) * 90, (Math.random() - .5) * 90, (Math.random() - .5) * 90); });
+  // geometria neuroni
+  const g = new THREE.BufferGeometry(), pos = new Float32Array(N.length * 3), col = new Float32Array(N.length * 3), siz = new Float32Array(N.length), luc = new Float32Array(N.length);
+  N.forEach((n, i) => { const T = TIPI[n.t] || TIPI.nota; tmpC.set(T.col); col.set([tmpC.r, tmpC.g, tmpC.b], i * 3); siz[i] = (T.r + Math.min(2.2, Math.sqrt(n.grado) * .35)) * 3.2 * (n.f ? .7 : 1); luc[i] = .35; });
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('colore', new THREE.BufferAttribute(col, 3));
+  g.setAttribute('size', new THREE.BufferAttribute(siz, 1)); g.setAttribute('luce', new THREE.BufferAttribute(luc, 1));
+  punti = new THREE.Points(g, matNeuroni); punti.frustumCulled = false; scene.add(punti);
+  // sinapsi
+  const lg = new THREE.BufferGeometry(), lp = new Float32Array(E.length * 6), lc = new Float32Array(E.length * 6);
+  lg.setAttribute('position', new THREE.BufferAttribute(lp, 3)); lg.setAttribute('color', new THREE.BufferAttribute(lc, 3));
+  linee = new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false }));
+  linee.frustumCulled = false; scene.add(linee);
+  // impulsi che viaggiano sulle sinapsi
+  const ig = new THREE.BufferGeometry(), MAXI = 90; ig.setAttribute('position', new THREE.BufferAttribute(new Float32Array(MAXI * 3), 3));
+  ig.setAttribute('colore', new THREE.BufferAttribute(new Float32Array(MAXI * 3).fill(1), 3)); ig.setAttribute('size', new THREE.BufferAttribute(new Float32Array(MAXI).fill(2.4), 1)); ig.setAttribute('luce', new THREE.BufferAttribute(new Float32Array(MAXI).fill(.9), 1));
+  impulsiObj = new THREE.Points(ig, matNeuroni); impulsiObj.frustumCulled = false; scene.add(impulsiObj); impulsi = [];
+  passi = 0; legenda(); aggiornaColori();
+  const tipi = {}; N.forEach(n => tipi[n.t] = (tipi[n.t] || 0) + 1);
+  $('info').innerHTML = N.length + ' neuroni · ' + E.length + ' sinapsi<br>aggiornata ' + (m.creata || '');
+}
+
+/* ---------------- layout a forze (si assesta davanti ai tuoi occhi) ---------------- */
+let passi = 0;
+function forze() {
+  if (passi > 420 || !N.length) return; passi++;
+  const alfa = Math.max(.02, 1 - passi / 420), n = N.length, d = new THREE.Vector3();
+  for (let i = 0; i < n; i++) { const A = N[i];
+    for (let j = i + 1; j < n; j++) { const B = N[j]; d.subVectors(A.p, B.p); let l2 = d.lengthSq(); if (l2 > 3600) continue; if (l2 < .01) { d.set(Math.random() - .5, Math.random() - .5, Math.random() - .5); l2 = .01; }
+      const f = 70 / l2 * alfa; d.multiplyScalar(f / Math.sqrt(l2)); A.v.add(d); B.v.sub(d); } }
+  E.forEach(e => { d.subVectors(e.b.p, e.a.p); const l = d.length() || .01, lung = e.t === 'cliente' ? 11 : e.t === 'simile' ? 15 - e.w * 6 : 17; const f = (l - lung) * .035 * alfa * (e.t === 'cliente' ? 1.4 : 1); d.multiplyScalar(f / l); e.a.v.add(d); e.b.v.sub(d); });
+  N.forEach(x => { x.v.addScaledVector(x.p, -.0018 * alfa); x.v.multiplyScalar(.82); x.v.clampLength(0, 3); x.p.add(x.v); });
+}
+
+function aggiornaPosizioni() {
+  if (!punti) return;
+  const p = punti.geometry.attributes.position.array; N.forEach((n, i) => { p[i * 3] = n.p.x; p[i * 3 + 1] = n.p.y; p[i * 3 + 2] = n.p.z; }); punti.geometry.attributes.position.needsUpdate = true;
+  const lp = linee.geometry.attributes.position.array; E.forEach((e, i) => { lp.set([e.a.p.x, e.a.p.y, e.a.p.z, e.b.p.x, e.b.p.y, e.b.p.z], i * 6); }); linee.geometry.attributes.position.needsUpdate = true;
+}
+
+function visibile(n) { return !nascosti.has(n.t); }
+function aggiornaColori() {
+  if (!punti) return;
+  const L = punti.geometry.attributes.luce.array, S = punti.geometry.attributes.size.array;
+  const vicSel = sel ? new Set(vicini[sel.id].map(e => (e.a === sel ? e.b : e.a).id)) : null;
+  N.forEach((n, i) => { const T = TIPI[n.t] || TIPI.nota; let l = .32, s = (T.r + Math.min(2.2, Math.sqrt(n.grado) * .35)) * 3.2 * (n.f ? .7 : 1);
+    if (!visibile(n)) { l = 0; s = 0; }
+    else if (sel) { if (n === sel) { l = 1.3; s *= 1.9; } else if (vicSel.has(n.id)) { l = .85; s *= 1.25; } else l = .1; }
+    else if (evidenziati.size) { if (evidenziati.has(n.id)) { l = 1.15; s *= 1.6; } else l = .1; }
+    L[i] = l; S[i] = s; });
+  punti.geometry.attributes.luce.needsUpdate = true; punti.geometry.attributes.size.needsUpdate = true;
+  const lc = linee.geometry.attributes.color.array;
+  E.forEach((e, i) => { let k = e.t === 'cliente' ? .16 : e.t === 'simile' ? .1 + e.w * .1 : .08;
+    if (!visibile(e.a) || !visibile(e.b)) k = 0;
+    else if (sel) k = (e.a === sel || e.b === sel) ? .85 : .02;
+    else if (evidenziati.size) k = (evidenziati.has(e.a.id) && evidenziati.has(e.b.id)) ? .6 : .02;
+    tmpC.set(TIPI[e.a.t]?.col || '#20d9ff').lerp(new THREE.Color(TIPI[e.b.t]?.col || '#a16cff'), .5);
+    lc.set([tmpC.r * k, tmpC.g * k, tmpC.b * k, tmpC.r * k, tmpC.g * k, tmpC.b * k], i * 6); });
+  linee.geometry.attributes.color.needsUpdate = true;
+}
+
+function legenda() {
+  const c = {}; N.forEach(n => c[n.t] = (c[n.t] || 0) + 1);
+  $('leg').innerHTML = Object.keys(TIPI).filter(t => c[t]).map(t => '<span data-t="' + t + '" class="' + (nascosti.has(t) ? 'off' : '') + '" style="color:' + TIPI[t].col + '"><i></i><b style="color:#e8f7ff;font-weight:500">' + TIPI[t].nome + ' ' + c[t] + '</b></span>').join('');
+}
+$('leg').addEventListener('click', ev => { const s = ev.target.closest('[data-t]'); if (!s) return; const t = s.dataset.t; nascosti.has(t) ? nascosti.delete(t) : nascosti.add(t); legenda(); aggiornaColori(); });
+
+/* ---------------- impulsi ---------------- */
+function nuovoImpulso(da) {
+  const lista = da ? vicini[da.id] : E; if (!lista || !lista.length) return;
+  const e = lista[(Math.random() * lista.length) | 0]; if (!visibile(e.a) || !visibile(e.b)) return;
+  const verso = da ? (e.a === da ? 1 : -1) : (Math.random() < .5 ? 1 : -1);
+  impulsi.push({ e, verso, t: 0, v: .6 + Math.random() * .9 });
+}
+function animaImpulsi(dt) {
+  if (!impulsiObj) return;
+  const freq = sel ? 6 : evidenziati.size ? 4 : 2.2; if (Math.random() < freq * dt * 4) nuovoImpulso(sel && Math.random() < .8 ? sel : null);
+  if (impulsi.length > 90) impulsi.splice(0, impulsi.length - 90);
+  const p = impulsiObj.geometry.attributes.position.array, c = impulsiObj.geometry.attributes.colore.array, s = impulsiObj.geometry.attributes.size.array;
+  for (let i = impulsi.length - 1; i >= 0; i--) { const q = impulsi[i]; q.t += q.v * dt; if (q.t >= 1) impulsi.splice(i, 1); }
+  for (let i = 0; i < 90; i++) { const q = impulsi[i]; if (!q) { s[i] = 0; continue; }
+    const a = q.verso > 0 ? q.e.a : q.e.b, b = q.verso > 0 ? q.e.b : q.e.a, t = q.t;
+    p[i * 3] = a.p.x + (b.p.x - a.p.x) * t; p[i * 3 + 1] = a.p.y + (b.p.y - a.p.y) * t; p[i * 3 + 2] = a.p.z + (b.p.z - a.p.z) * t;
+    tmpC.set(TIPI[b.t]?.col || '#20d9ff'); c[i * 3] = tmpC.r; c[i * 3 + 1] = tmpC.g; c[i * 3 + 2] = tmpC.b; s[i] = 2.6; }
+  impulsiObj.geometry.attributes.position.needsUpdate = true; impulsiObj.geometry.attributes.colore.needsUpdate = true; impulsiObj.geometry.attributes.size.needsUpdate = true;
+}
+
+/* ---------------- tocchi, etichette, scheda ---------------- */
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+function prendi(x, y) {
+  if (!punti) return null; mouse.set(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1); ray.setFromCamera(mouse, camera);
+  ray.params.Points.threshold = Math.max(1.6, camera.position.distanceTo(controls.target) / 55);
+  const h = ray.intersectObject(punti).filter(x => visibile(N[x.index])); if (!h.length) return null;
+  h.sort((a, b) => a.distanceToRay - b.distanceToRay || a.distance - b.distance); return N[h[0].index];
+}
+let giu = null;
+renderer.domElement.addEventListener('pointerdown', e => { giu = { x: e.clientX, y: e.clientY, t: Date.now() }; controls.autoRotate = false; });
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!giu || Math.hypot(e.clientX - giu.x, e.clientY - giu.y) > 8 || Date.now() - giu.t > 500) { giu = null; return; } giu = null;
+  const n = prendi(e.clientX, e.clientY); n ? apri(n) : chiudiScheda();
+});
+renderer.domElement.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const n = prendi(e.clientX, e.clientY); hover = n; renderer.domElement.style.cursor = n ? 'pointer' : ''; });
+let hover = null;
+function etichetta() {
+  const n = hover || sel; const el = $('eti'); if (!n) { el.hidden = true; return; }
+  const v = n.p.clone().project(camera); if (v.z > 1) { el.hidden = true; return; }
+  el.hidden = false; el.textContent = n.n; el.style.left = ((v.x + 1) / 2 * innerWidth) + 'px'; el.style.top = ((1 - v.y) / 2 * innerHeight) + 'px'; el.style.borderColor = TIPI[n.t]?.col || '';
+}
+let volo = null;
+function vola(verso, dist) { const dir = camera.position.clone().sub(controls.target).normalize(); volo = { da: controls.target.clone(), a: verso.clone(), cda: camera.position.clone(), ca: verso.clone().add(dir.multiplyScalar(dist)), t: 0 }; }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function apri(n) {
+  sel = n; evidenziati.clear(); aggiornaColori(); vola(n.p, mobile ? 70 : 55);
+  const T = TIPI[n.t] || TIPI.nota;
+  $('sTipo').textContent = n.t.toUpperCase(); $('sTipo').style.color = T.col; $('sTit').textContent = n.n;
+  $('scheda').style.borderTopColor = T.col; $('scheda').classList.add('su'); spostaVista(true);
+  const vic = vicini[n.id].map(e => ({ x: e.a === n ? e.b : e.a, e })).sort((a, b) => b.e.w - a.e.w);
+  const parteVicini = vic.length ? '<div class="vicini"><small>COLLEGATO A (' + vic.length + ')</small>' + vic.slice(0, 30).map(v => '<a data-id="' + v.x.id + '" style="color:' + (TIPI[v.x.t]?.col || '#fff') + '"><i></i><span style="color:#e8f7ff">' + esc(v.x.n) + '</span></a>').join('') + '</div>' : '';
+  $('sBd').innerHTML = (n.s ? '<div class="campo"><div>' + esc(n.s) + '</div></div>' : '') + (n.d ? '<div class="campo"><small>Data</small><div>' + esc(n.d) + '</div></div>' : '') +
+    (n.l ? '<div class="campo"><small>Link</small><div><a href="' + esc(n.l) + '" target="_blank" rel="noopener">Apri ↗</a></div></div>' : '') + '<div id="sCampi"><div class="campo" style="color:#8da9c1">Carico il ricordo completo…</div></div>' + parteVicini;
+  api({ azione: 'cervello_voce', id: n.id }).then(j => { if (sel !== n) return;
+    $('sCampi').innerHTML = j.voce.campi.filter(c => !/^(id|vettore)$/i.test(c.k)).map(c => '<div class="campo"><small>' + esc(c.k) + '</small><div>' +
+      (/^https?:\/\//.test(c.v) ? c.v.split(/\s+/).map(u => '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(u.replace(/^https?:\/\//, '').slice(0, 60)) + '</a>').join('<br>') : esc(c.v)) + '</div></div>').join(''); },
+    e => { if (sel === n) $('sCampi').innerHTML = '<div class="campo" style="color:#ffb4a8">' + esc(e.message) + '</div>'; });
+}
+function chiudiScheda() { sel = null; $('scheda').classList.remove('su'); spostaVista(false); aggiornaColori(); }
+/** Sul telefono la scheda copre la parte bassa: sposto la vista in su, così il neurone scelto resta visibile. */
+function spostaVista(su) { if (su && innerWidth <= 700) camera.setViewOffset(innerWidth, innerHeight, 0, innerHeight * .26, innerWidth, innerHeight); else camera.clearViewOffset(); }
+addEventListener('resize', () => spostaVista(!!sel));
+$('sChiudi').onclick = chiudiScheda;
+$('sBd').addEventListener('click', ev => { const a = ev.target.closest('[data-id]'); if (a && idx[a.dataset.id]) apri(idx[a.dataset.id]); });
+
+/* ---------------- ricerca ---------------- */
+$('cerca').addEventListener('submit', ev => { ev.preventDefault(); const q = $('q').value.trim(); $('q').blur(); chiudiScheda();
+  if (!q) { evidenziati.clear(); aggiornaColori(); return; }
+  const k = q.toLowerCase(); evidenziati = new Set(N.filter(n => (n.n + ' ' + n.s).toLowerCase().includes(k)).map(n => n.id)); aggiornaColori(); centra();
+  stato('');
+  api({ azione: 'cervello_cerca', q }).then(j => { (j.trovati || []).forEach(id => evidenziati.add(id)); if (!evidenziati.size) { $('info').innerHTML = 'Nessun ricordo per «' + esc(q) + '»'; } aggiornaColori(); centra(); }, () => {});
+});
+function centra() { const l = N.filter(n => evidenziati.has(n.id)); if (!l.length) return; const c = new THREE.Vector3(); l.forEach(n => c.add(n.p)); c.divideScalar(l.length); vola(c, mobile ? 120 : 95); }
+
+/* ---------------- carica ---------------- */
+/* ---------------- intuizioni ---------------- */
+let INTU = null;
+function mostraIntuizioni(r) {
+  INTU = r; $('intBtn').hidden = false;
+  const lista = r && r.intuizioni && r.intuizioni.length ? r.intuizioni.map((x, i) => '<div class="it" data-i="' + i + '"><b>' + esc(x.titolo) + '</b><p>' + esc(x.perche) + '</p>' + (x.azione ? '<i>👉 ' + esc(x.azione) + '</i>' : '') + '</div>').join('')
+    : '<p style="color:#8da9c1">Ancora niente da segnalare. Il cervello pensa da solo ogni venerdì.</p>';
+  $('intu').innerHTML = '<h3>💡 COSA NOTA IL CERVELLO' + (r && r.creata ? ' · ' + esc(r.creata) : '') + '</h3>' + lista + '<button id="pensa" style="margin-top:6px;width:100%">🧠 Pensa adesso</button>';
+}
+$('intBtn').onclick = () => { $('intu').hidden = !$('intu').hidden; $('intBtn').classList.remove('nuovo'); };
+$('intu').addEventListener('click', ev => {
+  if (ev.target.id === 'pensa') { ev.target.textContent = 'Sto pensando… (può volerci un minuto)'; ev.target.disabled = true;
+    api({ azione: 'cervello_pensa' }).then(j => mostraIntuizioni(j.intuizioni), e => { ev.target.textContent = '⚠️ ' + e.message; }); return; }
+  const it = ev.target.closest('.it'); if (!it || !INTU) return;
+  document.querySelectorAll('.intu .it').forEach(x => x.classList.toggle('on', x === it));
+  accendi(INTU.intuizioni[Number(it.dataset.i)].neuroni || []);
+});
+function accendi(ids) { chiudiScheda(); evidenziati = new Set(ids.filter(id => idx[id])); aggiornaColori(); centra(); controls.autoRotate = false;
+  ids.forEach(id => { if (idx[id]) for (let k = 0; k < 4; k++) nuovoImpulso(idx[id]); }); }
+
+function carica(forza) {
+  stato(forza ? 'Ricostruisco la mappa…' : 'Accendo i neuroni…');
+  api({ azione: 'cervello', forza: !!forza }).then(j => { if (!j.mappa.neuroni.length) return stato('Il secondo cervello è ancora vuoto: dì ad ARGUS «ricordati che…» e torna qui.', true); costruisci(j.mappa); stato('');
+    mostraIntuizioni(j.mappa.intuizioni);
+    if (j.mappa.intuizioni && j.mappa.intuizioni.intuizioni && j.mappa.intuizioni.intuizioni.length) $('intBtn').classList.add('nuovo');
+    const acc = new URLSearchParams(location.search).get('accendi');
+    if (acc && !forza) setTimeout(() => { accendi(acc.split(',')); if (INTU && INTU.intuizioni) { const i = INTU.intuizioni.findIndex(x => (x.neuroni || []).join(',') === acc); if (i >= 0) { $('intu').hidden = false; const el = document.querySelectorAll('.intu .it')[i]; if (el) el.classList.add('on'); } } }, 2500); },
+    e => stato('Non riesco a leggere il cervello: ' + e.message, true));
+}
+$('agg').onclick = () => { chiudiScheda(); evidenziati.clear(); carica(true); };
+addEventListener('keydown', e => { if (e.key === 'Escape') { if (sel) chiudiScheda(); else $('chiudi').click(); } });
+carica(false);
+if (/prova=1/.test(location.search)) window.__apri = id => apri(idx[id]);
+
+/* ---------------- ciclo ---------------- */
+let ultimo = performance.now();
+function ciclo(now) {
+  requestAnimationFrame(ciclo); if (document.hidden) return;
+  const dt = Math.min(.05, (now - ultimo) / 1000); ultimo = now;
+  for (let k = 0; k < (passi < 120 ? 3 : 1); k++) forze();
+  if (passi <= 421) aggiornaPosizioni();
+  if (volo) { volo.t = Math.min(1, volo.t + dt * 1.6); const e = 1 - Math.pow(1 - volo.t, 3); controls.target.lerpVectors(volo.da, volo.a, e); camera.position.lerpVectors(volo.cda, volo.ca, e); if (volo.t >= 1) volo = null; }
+  if (!ridotto) animaImpulsi(dt);
+  controls.update(); etichetta(); renderer.render(scene, camera);
+}
+requestAnimationFrame(ciclo);
+</script>
+</body>
+</html>
